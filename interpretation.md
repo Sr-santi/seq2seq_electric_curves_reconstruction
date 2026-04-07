@@ -100,17 +100,19 @@ Approximate conversion (depends on outlier frequency in data):
 
 ## Model Results Tracker
 
-| 9   | Architecture                                                             | Criterion | Window | Epochs | Val Loss | RMSE (approx) |     |
-| --- | ------------------------------------------------------------------------ | --------- | ------ | ------ | -------- | ------------- | --- |
-| v1  | BiLSTM(8L) + FFN + 128hd                                                 | MSE       | 336    | 21     | 0.5859   | 0.77          | ??? |
-| v2  | BiLSTM(4L) + Conv1D                                                      | Huber     | 336    | ~12    | 0.648    | ~0.68         | ??? |
-| v3  | BiLSTM(4L) + FFN + 128hd                                                 | Huber     | 144    | 71     | 0.2196   | ~0.66         | ??? |
-| v4  | BiLSTM(4L) + FFN + 128hd                                                 | MSE       | 336    | 33     | 0.6022   | ~0.776        | ... |
-| v5  | BiLSTM(4L) + FFN (GELU) + 128hd                                          | Huber     | 336    | 39     | 0.2303   | ~0.678        | ... |
-| v6  | BiLSTM(4L) + Conv1D (GELU) + 128hd                                       | Huber     | 336    | 30     | 0.2224   | ~0.667        | ... |
-| v7  | BiLSTM(16L) + FFN + 128hd                                                | MSE       | 336    | 11     | 0.9213   | ~0.96         | ... |
-| v8  | BiLSTM(4L) + LSTM + 128hd                                                | MSE       | 336    | 10     | 0.7368   | ~0.86         | ... |
-| v9  | Transformer (d_model=128, 4L, 8h) + residual Conv                        | Huber     | 336    | 17     | 0.199    | ~0.63         | ... |
-| v10 | Transformer (d_model=128, 4L, 8h) + residual Conv + OneCycleLR Scheduler | Huber     | 336    | 17     | 0.1936   | ~0.62         | ... |
+| 9   | Architecture                                                                                          | Criterion | Window | Epochs | Val Loss | RMSE (approx) |     |
+| --- | ----------------------------------------------------------------------------------------------------- | --------- | ------ | ------ | -------- | ------------- | --- |
+| v1  | BiLSTM(8L) + FFN + 128hd                                                                              | MSE       | 336    | 21     | 0.5859   | 0.77          | ??? |
+| v2  | BiLSTM(4L) + Conv1D                                                                                   | Huber     | 336    | ~12    | 0.648    | ~0.68         | ??? |
+| v3  | BiLSTM(4L) + FFN + 128hd                                                                              | Huber     | 144    | 71     | 0.2196   | ~0.66         | ??? |
+| v4  | BiLSTM(4L) + FFN + 128hd                                                                              | MSE       | 336    | 33     | 0.6022   | ~0.776        | ... |
+| v5  | BiLSTM(4L) + FFN (GELU) + 128hd                                                                       | Huber     | 336    | 39     | 0.2303   | ~0.678        | ... |
+| v6  | BiLSTM(4L) + Conv1D (GELU) + 128hd                                                                    | Huber     | 336    | 30     | 0.2224   | ~0.667        | ... |
+| v7  | BiLSTM(16L) + FFN + 128hd                                                                             | MSE       | 336    | 11     | 0.9213   | ~0.96         | ... |
+| v8  | BiLSTM(4L) + LSTM + 128hd                                                                             | MSE       | 336    | 10     | 0.7368   | ~0.86         | ... |
+| v9  | Transformer (d_model=128, 4L, 8h) + residual Conv                                                     | Huber     | 336    | 17     | 0.199    | ~0.63         | ... |
+| v10 | Transformer (d_model=128, 4L, 8h) + residual Conv + OneCycleLR Scheduler                              | Huber     | 336    | 17     | 0.1936   | ~0.62         | ... |
+| v10 | Transformer (d_model=128, 4L, 8h) + residual Conv + MLP Decoder + OneCycleLR Scheduler                | Huber     | 336    | 22     | 0.2016   | ~0.635        | ... |
+| v11 | Transformer (d_model=128, 4L, 8h) + dual decoder (Conv1d + Linear, sum) + input residual + OneCycleLR | Huber     | 336    | 29     | 0.1988   | ~0.63         | ... |
 
 > Fill in "vs Best Baseline" column after running `calculate_baselines()`.

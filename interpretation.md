@@ -9,8 +9,9 @@ are computed **only on hole positions** (missing data), not on known values.
 
 ## Baselines
 
-Baselines answer: _"How well can a simple, non-learned rule fill the holes?"_
+Baselines answer: *"How well can a simple, non-learned rule fill the holes?"*
 Our neural network must **beat every baseline** to justify its existence.
+
 
 | Baseline             | Strategy                                                 | Expected strength                           |
 | -------------------- | -------------------------------------------------------- | ------------------------------------------- |
@@ -19,9 +20,11 @@ Our neural network must **beat every baseline** to justify its existence.
 | **Linear Interp**    | Draw a straight line from last known to next known value | Strong for smooth data, fails on spikes.    |
 | **Historical Daily** | Copy the value from exactly 24h ago (48 steps)           | Strong if consumption is diurnal.           |
 
+
 ### Measured Baseline Values (Numerical aproximations)
 
 > `calculate_baselines(dm)`
+
 
 | Baseline             | MSE        | RMSE (std) | Huber (δ=1.0) |
 | -------------------- | ---------- | ---------- | ------------- |
@@ -29,6 +32,7 @@ Our neural network must **beat every baseline** to justify its existence.
 | Forward Fill         | **1.5707** | **1.2533** | 0.4990        |
 | Linear Interpolation | **1.2274** | **1.1079** | **0.4126**    |
 | Historical Daily     | **1.0046** | **1.0023** | **0.3356**    |
+
 
 The **strongest baseline** (lowest values) is our **minimum bar to beat**.
 
@@ -39,6 +43,7 @@ Since each meter column is standardized (std = 1):
 - **MSE** = average of (prediction − true)²
 - **RMSE** = √MSE = average error **in standard deviations**
 
+
 | MSE  | RMSE | Meaning                                          |
 | ---- | ---- | ------------------------------------------------ |
 | 1.00 | 1.00 | Predicting the mean. No information captured.    |
@@ -47,6 +52,7 @@ Since each meter column is standardized (std = 1):
 | 0.09 | 0.30 | ~30% of a std off. Reasonable reconstruction.    |
 | 0.04 | 0.20 | ~20% of a std off. Good quality.                 |
 | 0.01 | 0.10 | ~10% of a std off. Excellent.                    |
+
 
 ### Converting to Original Units (Watts)
 
@@ -66,6 +72,7 @@ Huber Loss with δ=1.0:
 
 Approximate conversion (depends on outlier frequency in data):
 
+
 | Huber | ≈ MSE equivalent | ≈ RMSE | Quality                               |
 | ----- | ---------------- | ------ | ------------------------------------- |
 | 0.35  | ~1.0             | ~1.0   | Predicting the mean. Useless.         |
@@ -75,44 +82,55 @@ Approximate conversion (depends on outlier frequency in data):
 | 0.02  | ~0.04            | ~0.20  | Good reconstruction.                  |
 | 0.01  | ~0.02            | ~0.14  | Excellent.                            |
 
+
 ## Target Values
 
 ### Minimum viable (must beat strongest baseline):
+
 
 | Criterion | Target                     | Rationale                    |
 | --------- | -------------------------- | ---------------------------- |
 | MSE       | < strongest baseline MSE   | Must outperform simple rules |
 | Huber     | < strongest baseline Huber | Must outperform simple rules |
 
+
 ### Visually acceptable (curve shape is recognizable):
+
 
 | Criterion | Target                   |
 | --------- | ------------------------ |
 | MSE       | < 0.10 (RMSE < 0.32 std) |
 | Huber     | < 0.05                   |
 
+
 ### Good quality (hard to distinguish from real at a glance):
+
 
 | Criterion | Target                   |
 | --------- | ------------------------ |
 | MSE       | < 0.04 (RMSE < 0.20 std) |
 | Huber     | < 0.02                   |
 
+
 ## Model Results Tracker
 
-| 9   | Architecture                                                                                          | Criterion | Window | Epochs | Val Loss | RMSE (approx) |     |
-| --- | ----------------------------------------------------------------------------------------------------- | --------- | ------ | ------ | -------- | ------------- | --- |
-| v1  | BiLSTM(8L) + FFN + 128hd                                                                              | MSE       | 336    | 21     | 0.5859   | 0.77          | ??? |
-| v2  | BiLSTM(4L) + Conv1D                                                                                   | Huber     | 336    | ~12    | 0.648    | ~0.68         | ??? |
-| v3  | BiLSTM(4L) + FFN + 128hd                                                                              | Huber     | 144    | 71     | 0.2196   | ~0.66         | ??? |
-| v4  | BiLSTM(4L) + FFN + 128hd                                                                              | MSE       | 336    | 33     | 0.6022   | ~0.776        | ... |
-| v5  | BiLSTM(4L) + FFN (GELU) + 128hd                                                                       | Huber     | 336    | 39     | 0.2303   | ~0.678        | ... |
-| v6  | BiLSTM(4L) + Conv1D (GELU) + 128hd                                                                    | Huber     | 336    | 30     | 0.2224   | ~0.667        | ... |
-| v7  | BiLSTM(16L) + FFN + 128hd                                                                             | MSE       | 336    | 11     | 0.9213   | ~0.96         | ... |
-| v8  | BiLSTM(4L) + LSTM + 128hd                                                                             | MSE       | 336    | 10     | 0.7368   | ~0.86         | ... |
-| v9  | Transformer (d_model=128, 4L, 8h) + residual Conv                                                     | Huber     | 336    | 17     | 0.199    | ~0.63         | ... |
-| v10 | Transformer (d_model=128, 4L, 8h) + residual Conv + OneCycleLR Scheduler                              | Huber     | 336    | 17     | 0.1936   | ~0.62         | ... |
-| v10 | Transformer (d_model=128, 4L, 8h) + residual Conv + MLP Decoder + OneCycleLR Scheduler                | Huber     | 336    | 22     | 0.2016   | ~0.635        | ... |
-| v11 | Transformer (d_model=128, 4L, 8h) + dual decoder (Conv1d + Linear, sum) + input residual + OneCycleLR | Huber     | 336    | 29     | 0.1988   | ~0.63         | ... |
+
+| 9   | Architecture                                                                                          | Criterion                           | Window | Epochs | Val Loss | RMSE (approx) | MSE(sample_id)                    |
+| --- | ----------------------------------------------------------------------------------------------------- | ----------------------------------- | ------ | ------ | -------- | ------------- | --------------------------------- |
+| v1  | BiLSTM(8L) + FFN + 128hd                                                                              | MSE                                 | 336    | 21     | 0.5859   | 0.77          | ???                               |
+| v2  | BiLSTM(4L) + Conv1D                                                                                   | Huber                               | 336    | ~12    | 0.648    | ~0.68         | ???                               |
+| v3  | BiLSTM(4L) + FFN + 128hd                                                                              | Huber                               | 144    | 71     | 0.2196   | ~0.66         | ???                               |
+| v4  | BiLSTM(4L) + FFN + 128hd                                                                              | MSE                                 | 336    | 33     | 0.6022   | ~0.776        | ...                               |
+| v5  | BiLSTM(4L) + FFN (GELU) + 128hd                                                                       | Huber                               | 336    | 39     | 0.2303   | ~0.678        | ...                               |
+| v6  | BiLSTM(4L) + Conv1D (GELU) + 128hd                                                                    | Huber                               | 336    | 30     | 0.2224   | ~0.667        | ...                               |
+| v7  | BiLSTM(16L) + FFN + 128hd                                                                             | MSE                                 | 336    | 11     | 0.9213   | ~0.96         | ...                               |
+| v8  | BiLSTM(4L) + LSTM + 128hd                                                                             | MSE                                 | 336    | 10     | 0.7368   | ~0.86         | ...                               |
+| v9  | Transformer (d_model=128, 4L, 8h) + residual Conv                                                     | Huber                               | 336    | 17     | 0.199    | ~0.63         | ...                               |
+| v10 | Transformer (d_model=128, 4L, 8h) + residual Conv + OneCycleLR Scheduler                              | Huber                               | 336    | 17     | 0.1936   | ~0.62         | ...                               |
+| v10 | Transformer (d_model=128, 4L, 8h) + residual Conv + MLP Decoder + OneCycleLR Scheduler                | Huber                               | 336    | 22     | 0.2016   | ~0.635        | ...                               |
+| v11 | Transformer (d_model=128, 4L, 8h) + dual decoder (Conv1d + Linear, sum) + input residual + OneCycleLR | Huber                               | 336    | 29     | 0.1988   | ~0.63         | ...                               |
+| v12 | Transformer (d_model=128, 4L, 8h) + Log-Transformed Inputs + Spectral-MSE Hybrid Loss + OneCycleLR    | masked Huber (holes) + α × L1(rFFT) | 256    | 30     | 0.2409   | ???           | MSE(680): 154.3 MSE(1000): 280.41 |
+
 
 > Fill in "vs Best Baseline" column after running `calculate_baselines()`.
+
